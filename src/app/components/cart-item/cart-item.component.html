@@ -1,0 +1,21 @@
+<div class="mb-4 flex items-center gap-4 bg-white rounded p-4 shadow-sm hover:shadow-md transition-shadow">
+  <img
+    [src]="item.img"
+    [alt]="item.name"
+    class="w-16 h-16 object-cover rounded"
+    (error)="onImageError($event)"
+  />
+  <div class="flex-1">
+    <div>
+      <span class="font-medium">{{ item.name }}</span>
+      <span class="text-sm text-gray-500 ml-2">x {{ item.quantity }}</span>
+    </div>
+  </div>
+  <div>
+    ${{ item.price * item.quantity }}
+    <button
+      (click)="remove()"
+      class="text-red ml-4 cursor-pointer"
+    >Remove</button>
+  </div>
+</div>

@@ -1,59 +1,66 @@
-# ECommerce
+# E-Commerce Application
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.9.
+This is an Angular-based e-commerce application that allows users to browse products, add them to a cart, and manage their purchases. The project is designed to demonstrate clean architecture, reusable components, and responsive design.
 
-## Development server
+## Features
 
-To start a local development server, run:
+- **Product Listing**: View a list of products with details such as name, price, and availability.
+- **Cart Management**: Add products to the cart, adjust quantities, and view the total price.
+- **Responsive Design**: Optimized for both desktop and mobile devices.
+- **API Integration**: Fetch product data from a mock API.
+- **Error Handling**: Fallback mechanisms for missing images and invalid inputs.
 
-```bash
+## Project Structure
+```sh
+src/
+├── app/
+│   ├── components/       # Reusable components (e.g., product, cart)
+│   ├── models/           # TypeScript models for data structures
+│   ├── resolvers/        # Route resolvers for preloading data
+│   ├── services/         # Services for API calls and state management
+│   ├── app.component.*   # Root component
+│   ├── app.routes.ts     # Application routes
+├── index.html            # Main HTML file
+├── main.ts               # Application entry point
+├── styles.scss           # Global styles
+```
+## Installation
+
+1. Clone the repository:
+```sh
+git clone https://github.com/HunSpeedi/e-commerce.git
+cd e-commerce
+```
+
+2. Install dependencies:
+```sh
+npm install
+```
+3. Start the development server:
+```sh
 ng serve
 ```
+4. Open the application in your browser at http://localhost:4200.
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Scripts
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
+- **Build**: Build the project for production:
+```sh
+npm run build
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
+- **Lint**: Run linting checks:
+```sh
+npm run lint
+```
+- **Test**: Run unit tests:
+```sh
+npm run test
 ```
 
-## Building
+## API
 
-To build the project run:
-
-```bash
-ng build
+The application fetches product data from a mock API:
+```sh
+https://63c10327716562671870f959.mockapi.io/products
 ```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
