@@ -5,10 +5,12 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { CartService } from './cart.service';
 import { ProductsService } from './products.service';
 import { type Product } from '../models/product.model';
+import { CartStorageService } from './cart-storage.service';
 
 describe('CartService', () => {
   let service: CartService;
   let httpTestingController: HttpTestingController;
+  let mockCartStorageService: jasmine.SpyObj<CartStorageService>;
 
   const mockProduct: Product = {
     id: 1,
@@ -20,10 +22,13 @@ describe('CartService', () => {
   };
 
   beforeEach(() => {
+    mockCartStorageService = jasmine.createSpyObj('CartStorageService', ['loadCart', 'saveCart']);
+    mockCartStorageService.loadCart.and.returnValue(new Map());
     TestBed.configureTestingModule({
       providers: [
         CartService,
         ProductsService,
+        { provide: CartStorageService, useValue: mockCartStorageService },
         provideHttpClient(),
         provideHttpClientTesting(),
       ],
@@ -112,5 +117,34 @@ describe('CartService', () => {
         img: mockProduct.img,
       },
     ]);
+  });
+
+  it('should load the cart from storage on initialization', () => {
+    expect(mockCartStorageService.loadCart).toHaveBeenCalled();
+  });
+
+  it('should save the cart to storage when the cart changes', () => {
+    service.addToCart(mockProduct, 3);
+    TestBed.flushEffects(); 
+    expect(mockCartStorageService.saveCart).toHaveBeenCalledWith(
+      jasmine.any(Map)
+    );
+  });
+
+  it('should save the updated cart to storage after removing an item', () => {
+    service.addToCart(mockProduct, 3);
+    TestBed.flushEffects(); 
+    service.removeFromCart(mockProduct);
+    TestBed.flushEffects();
+    expect(mockCartStorageService.saveCart).toHaveBeenCalledTimes(2);
+  });
+
+  it('should save an empty cart to storage after clearing all items', () => {
+    service.addToCart(mockProduct, 3);
+    TestBed.flushEffects(); 
+    service.removeFromCart(mockProduct);
+    TestBed.flushEffects(); 
+    const lastSavedCart = mockCartStorageService.saveCart.calls.mostRecent().args[0];
+    expect(lastSavedCart.size).toBe(0);
   });
 });

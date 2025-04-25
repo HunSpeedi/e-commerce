@@ -1,17 +1,25 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { computed, effect, inject, Injectable, signal } from '@angular/core';
 
 import { type CartItem } from '../models/cart-item.model';
 import { type Product } from '../models/product.model';
 import { ProductsService } from './products.service';
 import { ProductKeyService } from './product-key.service';
+import { CartStorageService } from './cart-storage.service';
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
   public productsService = inject(ProductsService);
   private productKeyService = inject(ProductKeyService);
-  private cart = signal<Map<string, CartItem>>(new Map());
+  private cartStorageService = inject(CartStorageService);
+  private cart = signal<Map<string, CartItem>>(this.cartStorageService.loadCart());
 
   getCart = computed(() => [...this.cart().values()]);
+
+  constructor() {
+    effect(() => {
+      this.cartStorageService.saveCart(this.cart());
+    });
+  }
 
   addToCart(product: Product, amount: number): void {
     const cart = new Map(this.cart());
