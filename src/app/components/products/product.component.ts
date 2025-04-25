@@ -25,7 +25,7 @@ export class ProductComponent implements OnInit {
   }
 
   availableQuantity: Signal<number> = computed(() => {
-    return this.product.availableAmount - this.cartService.getQuantityInCart(this.product.id);
+    return this.product.availableAmount - this.cartService.getQuantityInCart(this.product);
   });
 
   add(): void {

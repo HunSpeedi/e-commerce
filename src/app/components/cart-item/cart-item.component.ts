@@ -14,7 +14,7 @@ export class CartItemComponent {
   public cartService = inject(CartService);
 
   remove(): void {
-    this.cartService.removeFromCart(this.item.id)
+    this.cartService.removeFromCart(this.item)
   }
 
   onImageError(event: Event): void {

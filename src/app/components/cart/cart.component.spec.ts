@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
+import { computed, signal } from '@angular/core';
 
 import { CartComponent } from './cart.component';
 import { CartService } from '../../services/cart.service';
@@ -10,14 +10,16 @@ describe('CartComponent', () => {
   let mockCartService: jasmine.SpyObj<CartService>;
   let fixture: ComponentFixture<CartComponent>;
 
-  const mockCart = signal([
+  const mockCartSignal = signal([
     { id: 1, name: 'Product 1', price: 100, quantity: 2, img: '' },
     { id: 2, name: 'Product 2', price: 200, quantity: 1, img: '' },
   ]);
 
   beforeEach(() => {
-    mockCartService = jasmine.createSpyObj('CartService', ['getCart']);
-    mockCartService.getCart.and.returnValue(mockCart);
+    mockCartService = jasmine.createSpyObj('CartService', [], {
+      cart: mockCartSignal,
+      getCart: computed(() => [...mockCartSignal().values()]),
+    });
 
     TestBed.configureTestingModule({
       imports: [CartComponent, CartItemComponent],
@@ -29,7 +31,7 @@ describe('CartComponent', () => {
   });
 
   afterEach(() => {
-    mockCart.set([
+    mockCartSignal.set([
       { id: 1, name: 'Product 1', price: 100, quantity: 2, img: '' },
       { id: 2, name: 'Product 2', price: 200, quantity: 1, img: '' },
     ]);
@@ -58,7 +60,7 @@ describe('CartComponent', () => {
   });
   
   it('should display fallback message when cart is empty', () => {
-    mockCart.set([]);
+    mockCartSignal.set([]);
     fixture.detectChanges();
     const cartItems = component.cart();
     expect(cartItems.length).toBe(0);

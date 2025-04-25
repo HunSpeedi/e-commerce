@@ -1,21 +1,21 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 
 import { type CartItem } from '../models/cart-item.model';
 import { type Product } from '../models/product.model';
 import { ProductsService } from './products.service';
+import { ProductKeyService } from './product-key.service';
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
   public productsService = inject(ProductsService);
-  private cart = signal<CartItem[]>([]);
+  private productKeyService = inject(ProductKeyService);
+  private cart = signal<Map<string, CartItem>>(new Map());
 
-  getCart()  {
-    return this.cart.asReadonly();
-  }
+  getCart = computed(() => [...this.cart().values()]);
 
   addToCart(product: Product, amount: number): void {
-    const cartItems = [...this.cart()];
-    const cartItem = cartItems.find(item => item.id === product.id);
+    const cart = new Map(this.cart());
+    const cartItem = cart.get(this.productKeyService.generateKeyByIdAndName(product));
     const quantityInCart = cartItem?.quantity || 0;
     const remaining = product.availableAmount - quantityInCart;
 
@@ -35,27 +35,32 @@ export class CartService {
     if (cartItem) {
       cartItem.quantity += amount;
     } else {
-      cartItems.push({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        quantity: amount,
-        img: product.img,
-      });
+      cart.set(
+        this.productKeyService.generateKeyByIdAndName(product),
+        {
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          quantity: amount,
+          img: product.img,
+        }
+      );
     }
 
-    this.cart.set(cartItems);
+    this.cart.set(cart);
   }
 
-  removeFromCart(productId: number): void{
-    this.cart.set(this.cart().filter(item => item.id !== productId));
+  removeFromCart(product: Product | CartItem): void {
+    const cart = new Map(this.cart());
+    cart.delete(this.productKeyService.generateKeyByIdAndName(product));
+    this.cart.set(cart);
   }
 
-  getQuantityInCart(productId: number): number {
-    return this.cart().find(item => item.id === productId)?.quantity || 0;
+  getQuantityInCart(product: Product): number {
+    return this.cart().get(this.productKeyService.generateKeyByIdAndName(product))?.quantity || 0;
   }
 
   getCartCount(): number {
-    return this.cart().reduce((acc, item) => acc + item.quantity, 0);
+    return [...this.cart().values()].reduce((acc, item) => acc + item.quantity, 0);
   }
 }

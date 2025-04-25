@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter, Router } from '@angular/router';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
-import { signal } from '@angular/core';
+import { computed, signal } from '@angular/core';
 
 import { CartService } from '../../services/cart.service';
 import { NavbarComponent } from './navbar.component';
@@ -12,15 +12,16 @@ describe('NavbarComponent', () => {
   let mockCartService: jasmine.SpyObj<CartService>;
   let httpTestingController: HttpTestingController;
 
-  const mockCart = signal([
+  const mockCartSignal = signal([
     { id: 1, name: 'Product 1', price: 100, quantity: 2, img: '' },
     { id: 2, name: 'Product 2', price: 200, quantity: 1, img: '' },
   ]);
 
   beforeEach(() => {
-    mockCartService = jasmine.createSpyObj('CartService', ['getCart', 'getCartCount']);
-    mockCartService.getCart.and.returnValue(mockCart);
-    mockCartService.getCartCount.and.returnValue(3);
+    mockCartService = jasmine.createSpyObj('CartService', [], {
+      getCart: mockCartSignal,
+      getCartCount: computed(() => mockCartSignal().reduce((acc, item) => acc + item.quantity, 0)),
+    });
 
     TestBed.configureTestingModule({
       imports: [NavbarComponent],

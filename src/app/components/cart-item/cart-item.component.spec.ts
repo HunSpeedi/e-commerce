@@ -53,7 +53,7 @@ describe('CartItemComponent', () => {
     const removeButton = fixture.debugElement.query(By.css('button')).nativeElement;
     removeButton.click();
     expect(component.remove).toHaveBeenCalled();
-    expect(mockCartService.removeFromCart).toHaveBeenCalledWith(mockCartItem.id);
+    expect(mockCartService.removeFromCart).toHaveBeenCalledWith(mockCartItem);
   });
 
   it('should set a fallback image on image error', () => {
