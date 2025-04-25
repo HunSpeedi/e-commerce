@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { NgFor } from '@angular/common';
 
 import { ProductsService } from '../../services/products.service';
-import { ProductComponent } from '../products/product.component';
+import { ProductComponent } from '../product/product.component';
 import { type Product } from '../../models/product.model';
 import { ProductKeyService } from '../../services/product-key.service';
 
