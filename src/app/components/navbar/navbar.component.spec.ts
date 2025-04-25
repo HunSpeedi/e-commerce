@@ -1,6 +1,7 @@
+import { provideRouter, Router } from '@angular/router';
+import { withComponentInputBinding } from '@angular/router';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, provideRouter, Router } from '@angular/router';
-import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { computed, signal } from '@angular/core';
 
 import { CartService } from '../../services/cart.service';
@@ -10,7 +11,7 @@ describe('NavbarComponent', () => {
   let component: NavbarComponent;
   let fixture: ComponentFixture<NavbarComponent>;
   let mockCartService: jasmine.SpyObj<CartService>;
-  let httpTestingController: HttpTestingController;
+  let router: Router;
 
   const mockCartSignal = signal([
     { id: 1, name: 'Product 1', price: 100, quantity: 2, img: '' },
@@ -27,58 +28,66 @@ describe('NavbarComponent', () => {
       imports: [NavbarComponent],
       providers: [
         provideHttpClientTesting(),
-        provideRouter([]),
+        provideRouter(
+          [
+            { path: 'cart', component: NavbarComponent },
+            { path: 'products', component: NavbarComponent },
+          ],
+          withComponentInputBinding()
+        ),
         { provide: CartService, useValue: mockCartService },
-        { provide: ActivatedRoute, useValue: {} }
       ],
     });
 
-    httpTestingController = TestBed.inject(HttpTestingController); 
+    router = TestBed.inject(Router);
     fixture = TestBed.createComponent(NavbarComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
   afterEach(() => {
-    httpTestingController.verify();
+    TestBed.resetTestingModule();
   });
 
   it('should create the component', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should display the total cart count', () => {
+  it('should display the total cart count', async () => {
+    await router.navigate(['/products']);
+    fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     const cartCountElement = compiled.querySelector('a[routerLink="/cart"]');
     expect(cartCountElement?.textContent).toContain('3');
   });
 
-  it('should navigate to the cart page when cart button is clicked', () => {
-    const router = TestBed.inject(Router);
-    spyOn(router, 'navigateByUrl');
+  it('should navigate to the cart page when cart button is clicked', async () => {
+    await router.navigate(['/products']);
+    fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     const cartCountElement = compiled.querySelector('a[routerLink="/cart"]') as HTMLElement;
-    cartCountElement?.click()
-    expect(router.navigateByUrl).toHaveBeenCalledWith(jasmine.stringMatching('/cart'), jasmine.any(Object));
+
+    cartCountElement?.click();
+    await fixture.whenStable();
+
+    expect(router.url).toBe('/cart');
   });
 
-  it('should not display the cart link when on the /cart page', () => {
-    const router = TestBed.inject(Router);
-    spyOnProperty(router, 'url', 'get').and.returnValue('/cart');
+  it('should not display the cart link when on the /cart page', async () => {
+    await router.navigate(['/cart']);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     const cartLink = compiled.querySelector('a[routerLink="/cart"]');
     expect(cartLink).toBeNull();
   });
 
-  it('should navigate to the products page when Products button is clicked', () => {
-    const router = TestBed.inject(Router);
-    spyOnProperty(router, 'url', 'get').and.returnValue('/cart');
-    spyOn(router, 'navigateByUrl');
-    fixture.detectChanges();
+  it('should navigate to the products page when Products button is clicked', async () => {
     const compiled = fixture.nativeElement as HTMLElement;
-    const cartCountElement = compiled.querySelector('a[routerLink="/products"]') as HTMLElement;
-    cartCountElement?.click()
-    expect(router.navigateByUrl).toHaveBeenCalledWith(jasmine.stringMatching('/products'), jasmine.any(Object));
+    const productsLink = compiled.querySelector('a[routerLink="/products"]') as HTMLElement;
+
+    productsLink?.click();
+    await fixture.whenStable();
+
+    expect(router.url).toBe('/products');
   });
 });
