@@ -14,6 +14,8 @@ export class NavbarComponent {
   public router = inject(Router);
   public isCartPage = true;
 
+  productsAmountInCart = this.cartService.productsAmountInCart;
+
   constructor() {
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))

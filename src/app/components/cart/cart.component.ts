@@ -12,10 +12,8 @@ import { CartItemComponent } from '../cart-item/cart-item.component';
 export class CartComponent {
   public cartService = inject(CartService);
   cart = this.cartService.getCart;
-
-  totalQuantity = computed(() =>
-    this.cart().reduce((acc, item) => acc + item.quantity, 0)
-  );
+  totalQuantity = this.cartService.totalQuantity;
+  productsAmountInCart = this.cartService.productsAmountInCart;
 
   totalPrice = computed(() =>
     this.cart().reduce((acc, item) => acc + item.price * item.quantity, 0)

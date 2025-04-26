@@ -19,6 +19,8 @@ describe('CartComponent', () => {
     mockCartService = jasmine.createSpyObj('CartService', [], {
       cart: mockCartSignal,
       getCart: computed(() => [...mockCartSignal().values()]),
+      totalQuantity: computed(() => mockCartSignal().reduce((acc, item) => acc + item.quantity, 0)),
+      productsAmountInCart: computed(() => mockCartSignal().length),
     });
 
     TestBed.configureTestingModule({

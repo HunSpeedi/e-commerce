@@ -16,7 +16,7 @@ describe('AppComponent', () => {
   let component: AppComponent;
 
   beforeEach(async () => {
-    mockCartService = jasmine.createSpyObj('CartService', ['getQuantityInCart', 'addToCart', 'getCartCount']);
+    mockCartService = jasmine.createSpyObj('CartService', ['getQuantityInCart', 'addToCart', 'totalQuantity', 'productsAmountInCart']);
     mockProductsService = jasmine.createSpyObj('ProductsService', ['fetchProducts', 'getProducts']);
 
     await TestBed.configureTestingModule({

@@ -21,7 +21,7 @@ describe('NavbarComponent', () => {
   beforeEach(() => {
     mockCartService = jasmine.createSpyObj('CartService', [], {
       getCart: mockCartSignal,
-      getCartCount: computed(() => mockCartSignal().reduce((acc, item) => acc + item.quantity, 0)),
+      productsAmountInCart: computed(() => mockCartSignal().length),
     });
 
     TestBed.configureTestingModule({
@@ -53,12 +53,12 @@ describe('NavbarComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should display the total cart count', async () => {
+  it('should display the amount of products in cart', async () => {
     await router.navigate(['/products']);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     const cartCountElement = compiled.querySelector('a[routerLink="/cart"]');
-    expect(cartCountElement?.textContent).toContain('3');
+    expect(cartCountElement?.textContent).toContain('2');
   });
 
   it('should navigate to the cart page when cart button is clicked', async () => {

@@ -8,12 +8,17 @@
     }
 
     <div class="mt-6 font-semibold text-lg flex justify-between">
-      <span>Total Amount:</span>
+      <span>Total amount of products:</span>
+      <span>{{ productsAmountInCart() }}</span>
+    </div>
+
+    <div class="font-semibold text-lg flex justify-between">
+      <span>Total amount of items:</span>
       <span>{{ totalQuantity() }}</span>
     </div>
 
     <div class="font-semibold text-lg flex justify-between">
-      <span>Total Price:</span>
+      <span>Total price:</span>
       <span>${{ totalPrice() }}</span>
     </div>
   }

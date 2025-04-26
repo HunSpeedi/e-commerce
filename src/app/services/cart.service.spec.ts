@@ -104,7 +104,7 @@ describe('CartService', () => {
     service.addToCart(mockProduct, 3);
     const mockProduct2: Product = { ...mockProduct, id: 2, name: 'Another Product' };
     service.addToCart(mockProduct2, 5);
-    const count = service.getCartCount();
+    const count = service.totalQuantity();
     expect(count).toBe(8);
   });
 

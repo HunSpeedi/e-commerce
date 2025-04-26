@@ -66,7 +66,10 @@ export class CartService {
     return this.cart().get(this.productKeyService.generateKeyByIdAndName(product))?.quantity || 0;
   }
 
-  getCartCount(): number {
-    return [...this.cart().values()].reduce((acc, item) => acc + item.quantity, 0);
-  }
+  totalQuantity = computed(() => 
+    [...this.cart().values()].reduce((acc, item) => acc + item.quantity, 0)
+  );
+
+  productsAmountInCart = computed(() =>  [...this.cart().values()].length);
+  
 }
