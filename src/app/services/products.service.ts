@@ -1,6 +1,6 @@
 import { inject, Injectable, Signal, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { catchError, Observable, tap } from 'rxjs';
 
 import { type Product } from '../models/product.model';
 
@@ -11,7 +11,11 @@ export class ProductsService {
 
   fetchProducts(): Observable<Product[]> {
     return this.http.get<Product[]>('https://63c10327716562671870f959.mockapi.io/products').pipe(
-      tap((data) => this.products.set(data))
+      tap((data) => this.products.set(data)),
+      catchError((error) => {
+        alert(`Error: ${error.message}`);
+        throw error;
+      })
     );
   }
 
