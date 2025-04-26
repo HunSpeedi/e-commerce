@@ -4,7 +4,6 @@ import { CartService } from '../../services/cart.service';
 import { CartItemComponent } from '../cart-item/cart-item.component';
 
 @Component({
-  standalone: true,
   selector: 'app-cart',
   templateUrl: './cart.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

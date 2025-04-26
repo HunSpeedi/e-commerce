@@ -24,7 +24,7 @@ describe('ProductComponent', () => {
   };
 
   beforeEach(() => {
-    mockCartService = jasmine.createSpyObj('CartService', ['getQuantityInCart', 'addToCart']);
+    mockCartService = jasmine.createSpyObj('CartService', ['getQuantityInCart', 'addToCart', 'removeFromCart']);
     mockProductsService = jasmine.createSpyObj('ProductsService', ['fetchProducts', 'getProducts']);
 
     TestBed.configureTestingModule({
@@ -60,23 +60,34 @@ describe('ProductComponent', () => {
     expect(compiled.querySelector('p.text-gray-500')?.textContent).toContain(`Available: ${mockProduct.availableAmount}`);
   });
 
+  it('should set fallback image on image error', () => {
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    const imgElement = compiled.querySelector('img') as HTMLImageElement;
+    imgElement.src = 'invalid-image-url';
+    const mockEvent = new Event('error');
+    imgElement.dispatchEvent(mockEvent);
+  
+    fixture.detectChanges();
+    expect(imgElement.src.endsWith('fallback.svg')).toBeTrue();
+  });
+
   it('should initialize quantity to product.minOrderAmount', () => {
     component.ngOnInit();
     expect(component.quantity()).toBe(mockProduct.minOrderAmount);
   });
 
-  it('should disable the decrease button when quantity is at minimum', () => {
+  it('should call addToCart when "Add to Cart" button is clicked', () => {
     mockCartService.getQuantityInCart.and.returnValue(0);
-    component.ngOnInit();
     fixture.detectChanges();
 
-    const decreaseButton = fixture.debugElement.query(By.css('button:nth-of-type(1)'));
-
-    expect(decreaseButton.nativeElement.disabled).toBeTrue();
+    const addToCartButton = fixture.debugElement.query(By.css('button.mt-3'));
+    addToCartButton.triggerEventHandler('click', null);
+    expect(mockCartService.addToCart).toHaveBeenCalledWith(mockProduct, mockProduct.minOrderAmount);  
   });
 
   it('should adjust quantity when + or − buttons are clicked', () => {
-    component.ngOnInit();
+    mockCartService.getQuantityInCart.and.returnValue(mockProduct.minOrderAmount);
     fixture.detectChanges();
 
     const increaseButton = fixture.debugElement.query(By.css('button:nth-of-type(2)'));
@@ -93,44 +104,17 @@ describe('ProductComponent', () => {
     expect(component.quantity()).toBe(mockProduct.minOrderAmount);
   });
 
-  it('should disable the "Add to Cart" button when quantity exceeds available amount', () => {
-    mockCartService.getQuantityInCart.and.returnValue(0);
-    fixture.detectChanges();
-    component.quantity.set(mockProduct.availableAmount + 1);
+  it('should remove the item from cart when quantity is decreased below minimum', () => {
+    mockCartService.getQuantityInCart.and.returnValue(mockProduct.minOrderAmount);
     fixture.detectChanges();
 
-    const addToCartButton = fixture.debugElement.query(By.css('button.mt-3'));
-    expect(addToCartButton.nativeElement.disabled).toBeTrue();
-  });
-
-  it('should call addToCart when "Add to Cart" button is clicked', () => {
-    mockCartService.getQuantityInCart.and.returnValue(0);
-    fixture.detectChanges();
-    component.quantity.set(5);
-    fixture.detectChanges();
-
-    const addToCartButton = fixture.debugElement.query(By.css('button.mt-3'));
-    addToCartButton.triggerEventHandler('click', null);
-
-    expect(mockCartService.addToCart).toHaveBeenCalledWith(mockProduct, 5);
-  });
-
-  it('should set fallback image on image error', () => {
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    const imgElement = compiled.querySelector('img') as HTMLImageElement;
-    imgElement.src = 'invalid-image-url';
-    const mockEvent = new Event('error');
-    imgElement.dispatchEvent(mockEvent);
-  
-    fixture.detectChanges();
-    expect(imgElement.src.endsWith('fallback.svg')).toBeTrue();
+    const decreaseButton = fixture.debugElement.query(By.css('button:nth-of-type(1)'));
+    decreaseButton.triggerEventHandler('click', null);
+    expect(mockCartService.removeFromCart).toHaveBeenCalledWith(mockProduct);
   });
 
   it('should disable the increase button when quantity reaches available amount', () => {
-    mockCartService.getQuantityInCart.and.returnValue(0);
-    fixture.detectChanges();
-    component.quantity.set(mockProduct.availableAmount);
+    mockCartService.getQuantityInCart.and.returnValue(mockProduct.availableAmount);
     fixture.detectChanges();
   
     const increaseButton = fixture.debugElement.query(By.css('button:nth-of-type(2)'));
@@ -143,25 +127,57 @@ describe('ProductComponent', () => {
   
     expect(component.availableQuantity()).toBe(mockProduct.availableAmount - 3);
   });
-  
-  it('should update the UI when quantity changes', () => {
-    component.ngOnInit();
+
+  it('should call removeFromCart when adjustQuantity is called with a quantity less than minOrderAmount', () => {
+    mockCartService.getQuantityInCart.and.returnValue(mockProduct.minOrderAmount);
+    mockCartService.removeFromCart.and.returnValue();
     fixture.detectChanges();
-  
-    const quantityInput = fixture.debugElement.query(By.css('input'));
-    expect(quantityInput.nativeElement.value).toBe(String(mockProduct.minOrderAmount));
-  
-    component.adjustQuantity(2);
-    fixture.detectChanges();
-    expect(quantityInput.nativeElement.value).toBe(String(mockProduct.minOrderAmount + 2));
+
+    component.adjustQuantity(mockProduct.minOrderAmount - 3);
+
+    expect(mockCartService.removeFromCart).toHaveBeenCalledWith(mockProduct);
+    expect(component.quantity()).toBe(mockProduct.minOrderAmount);
   });
 
-  it('should be able to decrease the quantity after product added to the cart', () => {
-    mockCartService.getQuantityInCart.and.returnValue(3);
+  it('should call changeQuantity when adjustQuantity is called with a valid quantity', () => {
+    mockCartService.getQuantityInCart.and.returnValue(mockProduct.minOrderAmount);
     fixture.detectChanges();
-  
-    const decreaseButton = fixture.debugElement.query(By.css('button:nth-of-type(1)'));
-    expect(decreaseButton.nativeElement.disabled).toBeFalse();
+
+    component.adjustQuantity(1);
+
+    expect(mockCartService.addToCart).toHaveBeenCalled();
+    expect(component.quantity()).toBe(mockProduct.minOrderAmount + 1);
+  });
+
+  it('should not call changeQuantity when adjustQuantity is called with a quantity greater than availableAmount', () => {
+    mockCartService.getQuantityInCart.and.returnValue(mockProduct.minOrderAmount);
+    fixture.detectChanges();
+
+    component.adjustQuantity(mockProduct.availableAmount + 1);
+
+    expect(mockCartService.addToCart).not.toHaveBeenCalled();
+  });
+
+  it('should display the select element when isInCart is true', () => {
+    mockCartService.getQuantityInCart.and.returnValue(mockProduct.minOrderAmount);
+    fixture.detectChanges();
+
+    const selectElement = fixture.debugElement.query(By.css('select'));
+    expect(selectElement).toBeTruthy();
+
+    const addToCartButton = fixture.debugElement.query(By.css('button.mt-3'));
+    expect(addToCartButton).toBeFalsy();
+  });
+
+  it('should display the add to cart button when isInCart is false', () => {
+    mockCartService.getQuantityInCart.and.returnValue(0);
+    fixture.detectChanges();
+
+    const addToCartButton = fixture.debugElement.query(By.css('button.mt-3'));
+    expect(addToCartButton).toBeTruthy();
+
+    const selectElement = fixture.debugElement.query(By.css('select'));
+    expect(selectElement).toBeFalsy();
   });
   
 });

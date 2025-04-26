@@ -53,12 +53,15 @@ describe('CartService', () => {
     expect(cart[0].quantity).toBe(3);
   });
 
-  it('should increase the quantity of an existing product in the cart', () => {
-    service.addToCart(mockProduct, 3);
+  it('should change the quantity of an existing product in the cart', () => {
     service.addToCart(mockProduct, 4);
     const cart = service.getCart();
     expect(cart.length).toBe(1);
-    expect(cart[0].quantity).toBe(7);
+    expect(cart[0].quantity).toBe(4);
+    service.addToCart(mockProduct, 7);
+    const cart2 = service.getCart();
+    expect(cart2.length).toBe(1);
+    expect(cart2[0].quantity).toBe(7);
   });
 
   it('should throw an error if adding more than the available stock', () => {    

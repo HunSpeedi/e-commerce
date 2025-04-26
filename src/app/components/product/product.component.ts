@@ -5,48 +5,66 @@ import { CartService } from '../../services/cart.service';
 import { ProductsService } from '../../services/products.service';
 
 @Component({
-  standalone: true,
   selector: 'app-product',
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './product.component.html',
   imports: []
 })
 export class ProductComponent implements OnInit {
-  // product = input.required<Product>(); https://github.com/angular/angular/issues/59067
   @Input() product!: Product;
 
   public cartService = inject(CartService);
   public productsService = inject(ProductsService);
 
   quantity = signal<number>(0);
+  options = signal<number[]>([]);
 
   ngOnInit(): void {
-    this.quantity.set(this.product.minOrderAmount);
+    this.quantity.set(this.cartService.getQuantityInCart(this.product) || this.product.minOrderAmount);
+    this.options.set(Array.from({ length: this.product.availableAmount - this.product.minOrderAmount + 1 }, (_, i) => i + this.product.minOrderAmount));
   }
 
   availableQuantity: Signal<number> = computed(() => {
     return this.product.availableAmount - this.cartService.getQuantityInCart(this.product);
   });
 
+  isInCart: Signal<boolean> = computed(() => {
+    return this.cartService.getQuantityInCart(this.product) > 0;
+  });
+
+  onQuantityChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    const newQuantity = parseInt(select.value, 10);
+    this.changeQuantity(newQuantity);
+  }
+
+  changeQuantity(newQuantity: number): void {
+    this.cartService.addToCart(this.product, newQuantity);
+    this.quantity.set(newQuantity);
+  }
+
   add(): void {
     this.cartService.addToCart(this.product, this.quantity());
   }
 
   adjustQuantity(amount: number): void {
-    this.quantity.update(quantity => quantity + amount);
+    const newQuantity = this.quantity() + amount;
+    if(this.shouldNotDecreaseMoreThenMinOrderAmount(newQuantity)) {
+      this.cartService.removeFromCart(this.product);
+      this.quantity.set(this.product.minOrderAmount);
+    } else {
+      if (!this.shouldNotIncreaseMoreThenAvailableAmount(newQuantity)) {
+        this.changeQuantity(newQuantity);
+      }
+    }
   }
 
-  isIncreaseDisabled(): boolean {
-    return this.quantity() >= this.availableQuantity();
+  shouldNotIncreaseMoreThenAvailableAmount(quantity: number): boolean {
+    return quantity > this.product.availableAmount;
   }
 
-  isDecreaseDisabled(): boolean {
-    return (this.product.availableAmount === this.availableQuantity() && this.quantity() === this.product.minOrderAmount)
-      || this.quantity() <= 1;
-  }
-
-  isAddDisabled(): boolean {
-    return this.quantity() > this.availableQuantity();
+  shouldNotDecreaseMoreThenMinOrderAmount(quantity: number): boolean {
+    return quantity < this.product.minOrderAmount;
   }
 
   onImageError(event: Event): void {

@@ -5,7 +5,6 @@ import { CartService } from '../../services/cart.service';
 import { filter } from 'rxjs';
 
 @Component({
-  standalone: true,
   selector: 'app-navbar',
   templateUrl: './navbar.component.html',
   imports: [RouterLink]

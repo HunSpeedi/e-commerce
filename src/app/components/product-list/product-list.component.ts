@@ -7,7 +7,6 @@ import { type Product } from '../../models/product.model';
 import { ProductKeyService } from '../../services/product-key.service';
 
 @Component({
-  standalone: true,
   selector: 'app-product-list',
   templateUrl: './product-list.component.html',
   imports: [ProductComponent, NgFor]

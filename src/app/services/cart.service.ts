@@ -24,10 +24,8 @@ export class CartService {
   addToCart(product: Product, amount: number): void {
     const cart = new Map(this.cart());
     const cartItem = cart.get(this.productKeyService.generateKeyByIdAndName(product));
-    const quantityInCart = cartItem?.quantity || 0;
-    const remaining = product.availableAmount - quantityInCart;
 
-    if (quantityInCart === 0) {
+    if (!cartItem?.quantity) {
       if (amount < 1) {
         throw new Error('Must add at least 1');
       }
@@ -36,12 +34,12 @@ export class CartService {
       }
     }
 
-    if (amount > remaining) {
+    if (amount > product.availableAmount) {
       throw new Error('Not enough stock available');
     }
 
     if (cartItem) {
-      cartItem.quantity += amount;
+      cartItem.quantity = amount;
     } else {
       cart.set(
         this.productKeyService.generateKeyByIdAndName(product),
