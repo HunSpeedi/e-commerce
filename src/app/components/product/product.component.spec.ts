@@ -139,7 +139,7 @@ describe('ProductComponent', () => {
     expect(component.quantity()).toBe(mockProduct.minOrderAmount);
   });
 
-  it('should call changeQuantity when adjustQuantity is called with a valid quantity', () => {
+  it('should call addToCart when adjustQuantity is called with a valid quantity', () => {
     mockCartService.getQuantityInCart.and.returnValue(mockProduct.minOrderAmount);
     fixture.detectChanges();
 
@@ -147,6 +147,17 @@ describe('ProductComponent', () => {
 
     expect(mockCartService.addToCart).toHaveBeenCalled();
     expect(component.quantity()).toBe(mockProduct.minOrderAmount + 1);
+  });
+
+  it('should call changeQuantity when onQuantityChange is triggered', () => {
+    const mockEvent = {
+      target: { value: (mockProduct.minOrderAmount + 5).toString() }
+    } as unknown as Event;
+
+    spyOn(component, 'changeQuantity');
+    component.onQuantityChange(mockEvent);
+
+    expect(component.changeQuantity).toHaveBeenCalledWith(mockProduct.minOrderAmount + 5);
   });
 
   it('should not call changeQuantity when adjustQuantity is called with a quantity greater than availableAmount', () => {
@@ -179,5 +190,4 @@ describe('ProductComponent', () => {
     const selectElement = fixture.debugElement.query(By.css('select'));
     expect(selectElement).toBeFalsy();
   });
-  
 });

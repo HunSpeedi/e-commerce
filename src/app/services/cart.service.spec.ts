@@ -100,12 +100,20 @@ describe('CartService', () => {
     expect(quantity).toBe(0);
   });
 
-  it('should return the correct total cart count', () => {
+  it('should return the correct total quantity of the items', () => {
     service.addToCart(mockProduct, 3);
     const mockProduct2: Product = { ...mockProduct, id: 2, name: 'Another Product' };
     service.addToCart(mockProduct2, 5);
     const count = service.totalQuantity();
     expect(count).toBe(8);
+  });
+  
+  it('should return the correct total quantity of the products in the cart', () => {
+    service.addToCart(mockProduct, 3);
+    const mockProduct2: Product = { ...mockProduct, id: 2, name: 'Another Product' };
+    service.addToCart(mockProduct2, 5);
+    const count = service.productsAmountInCart();
+    expect(count).toBe(2);
   });
 
   it('should return the cart state correctly', () => {

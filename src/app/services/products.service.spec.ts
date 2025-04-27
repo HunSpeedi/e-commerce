@@ -15,6 +15,13 @@ describe('ProductsService', () => {
     { id: 2, img: 'img2.jpg', name: 'Product 2', availableAmount: 5, minOrderAmount: 1, price: 200 },
   ];
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mockHttpGet = (url: string, response: any, status = 200, statusText = '') => {
+    const req = httpTestingController.expectOne(url);
+    expect(req.request.method).toBe('GET');
+    req.flush(response, { status, statusText });
+  }
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
@@ -45,11 +52,21 @@ describe('ProductsService', () => {
       expect(products).toEqual(mockProducts);
     });
 
-    const req = httpTestingController.expectOne('https://63c10327716562671870f959.mockapi.io/products');
-    expect(req.request.method).toBe('GET');
-    req.flush(mockProducts);
+    mockHttpGet('https://63c10327716562671870f959.mockapi.io/products', mockProducts);
 
     expect(service.getProducts()()).toEqual(mockProducts);
+  });
+
+  it('should handle an error when fetching products', () => {
+    service.fetchProducts().subscribe({
+      error: (error) => {
+        expect(error.message).toBe('Http failure response for https://63c10327716562671870f959.mockapi.io/products: 500 Internal Server Error');
+      },
+    });
+
+    mockHttpGet('https://63c10327716562671870f959.mockapi.io/products', 'Error fetching products', 500, 'Internal Server Error');
+
+    expect(service.getProducts()()).toEqual([]);
   });
 
 });
