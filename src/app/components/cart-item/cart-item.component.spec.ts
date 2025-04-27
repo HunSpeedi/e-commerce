@@ -37,7 +37,7 @@ describe('CartItemComponent', () => {
 
   it('should display the product name and quantity', () => {
     const nameElement = fixture.debugElement.query(By.css('.font-medium')).nativeElement;
-    const quantityElement = fixture.debugElement.query(By.css('.text-sm')).nativeElement;
+    const quantityElement = fixture.debugElement.query(By.css('.text-gray-500')).nativeElement;
 
     expect(nameElement.textContent).toContain(mockCartItem.name);
     expect(quantityElement.textContent).toContain(`x ${mockCartItem.quantity}`);
