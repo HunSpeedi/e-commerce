@@ -1,6 +1,6 @@
 <nav class="bg-darkBlue text-white p-4 flex justify-between items-center h-[75px]">
   <a routerLink="/products" class="font-bold text-xl">Products</a>
-  @if (!isCartPage) {
+  @if (!isCartPage()) {
     <a 
       routerLink="/cart"
       class="bg-cyan text-white font-semibold px-4 py-2 rounded-full hover:bg-cyan/80 transition-colors"
